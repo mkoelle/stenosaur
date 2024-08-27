@@ -1,1 +1,4 @@
 .DS_Store
+test/
+docker/tmp/
+!docker/tmp/.gitkeep

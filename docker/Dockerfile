@@ -1,0 +1,1 @@
+FROM lscr.io/linuxserver/firefox:latest

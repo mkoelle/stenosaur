@@ -16,9 +16,12 @@ Options:
     - Starts and launches zoom client in a docker container
     - Controls app with pyautogui
 - Extend [mdouchement/docker-zoom-us][mdouchement]
-    - Starts and launches Zoom using Iceweasel (Firefox) in a docker container
+    - Starts and launches zoom client in a docker container
+    - exposes a vnc server to control the app
     - No automated control of the app
 - Build our own solution
+    - use [linuxserver/firefox][firefox] to expose a vnc access to a browser
+    - control the browser with selenium or pyautogui
 
 We wanted to use the zoom SDK to build the functionality.
 However, at this time use of the SDK requires registering the app with zoom.
@@ -31,9 +34,8 @@ Attempts to update the docker instance on an arm64 processor failed,
 as there is no release of the zoom client for arm64 processors.
 This prevents us from using ZoomRec to build the bot on our mac machines.
 
-[Docker-Zoom-us][mdouchement] launches a browser in the docker container to join the meeting.
-This should be able to run on arm64 processors.
-The existing solution though is not built with arm64 processors in mind.
+[Docker-Zoom-us][mdouchement] is not built with arm64 processors in mind.
+As it also uses the zoom client, it will not work on arm64 processors.
 It also lacks the ability to control the zoom client pragmatically.
 
 Building our own solution would require us to build a docker container that can run on arm64 processors.
@@ -55,3 +57,4 @@ Extra work will be needed to control the browser in the docker container.
 <!-- Footer links -->
 [kastldratza]: https://github.com/kastldratza/zoomrec
 [mdouchement]: https://github.com/mdouchement/docker-zoom-us
+[firefox]: https://docs.linuxserver.io/images/docker-firefox/

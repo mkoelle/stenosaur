@@ -46,7 +46,7 @@ Install Docker and Docker Compose.
 
 ```bash
 cd docker
-docker-compose up
+docker-compose up --build
 # go to localhost:3000
 ```
 

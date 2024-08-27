@@ -11,8 +11,8 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Etc/UTC
-      - FIREFOX_CLI=https://www.google.com #optional
+      - TZ=America/Chicago
+      - FIREFOX_CLI=https://www.duckduckgo.com #optional
     volumes:
       - ./tmp:/config
     ports:

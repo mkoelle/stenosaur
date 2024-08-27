@@ -47,6 +47,7 @@ Install Docker and Docker Compose.
 ```bash
 cd docker
 docker-compose up
+# go to localhost:3000
 ```
 
 ## Resources

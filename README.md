@@ -36,8 +36,19 @@ Dockerized Zoom/Discord virtual companion to add flavor to your meetings.
 - games
     - roll dice (roll a d6)
 
+## Development
+
+### Setup
+
+Install Docker and Docker Compose.
+
+### Running
+
+```bash
+cd docker
+docker-compose up
+```
+
 ## Resources
 
-- [Zoom API](https://marketplace.zoom.us/docs/api-reference/zoom-api)
-- [pull the names of participants](https://www.reddit.com/r/Zoom/comments/j0elr5/zoom_api_can_i_pull_the_names_of_participants_as/)
-- [zoom meeting sdk join](https://marketplacefront.zoom.us/sdk/meeting/web/modules/ZoomMtg.html#join)
+

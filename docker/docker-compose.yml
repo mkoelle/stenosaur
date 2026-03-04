@@ -11,6 +11,7 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
+      - PIXELFLUX_WAYLAND=true
       - TZ=America/Chicago
       - FIREFOX_CLI=https://www.duckduckgo.com #optional
     volumes:

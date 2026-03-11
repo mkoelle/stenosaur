@@ -1,0 +1,53 @@
+version: '3'
+
+vars:
+  BINARY: stenosaur
+  CMD: ./cmd/stenosaur
+
+tasks:
+  generate:
+    desc: run templ codegen and Tailwind CSS build
+    cmds:
+      - templ generate ./...
+      - tailwindcss -i ./pkg/controller/ui/static/tw.src.css -o ./pkg/controller/ui/static/tw.css --content './pkg/controller/ui/**/*.templ' --minify
+
+  build:
+    desc: compile the binary
+    deps: [generate]
+    cmds:
+      - go build -o bin/{{.BINARY}} {{.CMD}}
+
+  test:
+    desc: run all tests
+    cmds:
+      - go test ./...
+
+  test-race:
+    desc: run all tests with race detector
+    cmds:
+      - go test -race ./...
+
+  lint:
+    desc: run go vet
+    cmds:
+      - go vet ./...
+
+  up:
+    desc: build image and start with Docker Compose
+    cmds:
+      - docker compose up --build
+
+  down:
+    desc: stop Docker Compose services
+    cmds:
+      - docker compose down
+
+  image:
+    desc: build the Docker image only
+    cmds:
+      - docker compose build
+
+  clean:
+    desc: remove build artifacts
+    cmds:
+      - rm -rf bin/

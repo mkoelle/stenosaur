@@ -32,25 +32,25 @@ go install github.com/a-h/templ/cmd/templ@latest
 # install tailwindcss CLI from https://tailwindcss.com/docs/installation
 
 # Generate code (run after editing .templ files or when tw.css is stale)
-make generate
+task generate
 
 # Build binary
-make build
+task build
 
 # Run all tests
-make test
+task test
 
 # Run tests with race detector
-make test-race
+task test-race
 
 # Start with Docker Compose (production-like)
-make up
+task up
 
 # Stop
-make down
+task down
 
 # Build container image only
-make image
+task image
 ```
 
 ---
@@ -128,7 +128,7 @@ These values are fixed by Chromium's injection boundary. Do not change them with
 - Dynamic behavior uses **HTMX** attributes and **Alpine.js** for local component state. Do not add jQuery or other JS libraries.
 - Styling uses **Tailwind CSS** utility classes only. Do not write custom CSS outside of `tw.css` generation.
 - HTMX and Alpine.js are vendored in `pkg/controller/ui/static/`. Do not fetch from CDN at runtime.
-- After editing `.templ` files, run `make generate` to regenerate `*_templ.go` files before building.
+- After editing `.templ` files, run `task generate` to regenerate `*_templ.go` files before building.
 
 ---
 

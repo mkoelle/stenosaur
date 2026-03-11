@@ -15,7 +15,7 @@ This directory contains all HTML, templates, and static assets for the web admin
 | **Alpine.js for local state** | Toggling panels, confirmation dialogs, ephemeral UI state only. No Alpine for server calls. |
 | **Tailwind CSS only** | Use utility classes only. No custom CSS files other than `tw.css` (generated). |
 | **Vendored assets** | HTMX and Alpine.js are in `static/`. Never load from a CDN at runtime. |
-| **Run `make generate` after edits** | `.templ` → `*_templ.go` generation is required before `go build`. |
+| **Run `task generate` after edits** | `.templ` → `*_templ.go` generation is required before `go build`. |
 
 ## File Layout
 
@@ -74,5 +74,5 @@ ui/
 - Fetch from a CDN at runtime (HTMX, Alpine, Tailwind must all be vendored)
 - Write JavaScript outside of `x-` Alpine attributes or HTMX config
 - Use `html/template` anywhere in this directory
-- Hand-edit `tw.css` — edit `tw.src.css` and run `make generate`
+- Hand-edit `tw.css` — edit `tw.src.css` and run `task generate`
 - Add a JS framework (React, Vue, Svelte) without an ADR-007b update

@@ -62,9 +62,9 @@ go install github.com/a-h/templ/cmd/templ@latest
 # Install tailwindcss CLI: https://tailwindcss.com/docs/installation
 
 # Generate, build, test
-make generate
-make build
-make test
+task generate
+task build
+task test
 ```
 
 See [`AGENTS.md`](AGENTS.md) for full conventions, ADR index, and agentic coding tool instructions.

@@ -57,7 +57,7 @@ task image
 
 ## Go Conventions
 
-- **Go 1.21 minimum.** Use `log/slog` for all structured logging — never `fmt.Println`, `log.Printf`, or third-party loggers.
+- **Go 1.26 minimum.** Use `log/slog` for all structured logging — never `fmt.Println`, `log.Printf`, or third-party loggers.
 - **Error handling:** always return errors; never swallow them silently. Use `fmt.Errorf("context: %w", err)` for wrapping.
 - **Goroutine discipline:** every goroutine launched must have a `defer recover()` that logs the panic with `level: error` before exiting. Never launch a goroutine without panic recovery.
 - **Interfaces over concrete types** at package boundaries. Accept interfaces, return concrete types.

@@ -23,7 +23,7 @@ cp .env.example .env
 # Edit .env — set MEETING_URL, BOT_DISPLAY_NAME, and ADMIN_TOKEN (min 16 chars)
 
 # 3. Build and start
-docker compose up
+task up
 ```
 
 ### Usage

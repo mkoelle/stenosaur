@@ -8,6 +8,8 @@ package ui
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
+import "fmt"
+
 // StatusData is passed from pkg/controller into the dashboard template.
 // It matches the shape of the /status API response. (ADR-005)
 type StatusData struct {
@@ -96,7 +98,7 @@ func dashboard(d StatusData) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(d.Session.State)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/controller/ui/dashboard.templ`, Line: 38, Col: 44}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/controller/ui/dashboard.templ`, Line: 40, Col: 44}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -114,7 +116,7 @@ func dashboard(d StatusData) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(d.Session.MeetingURL)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/controller/ui/dashboard.templ`, Line: 41, Col: 74}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/controller/ui/dashboard.templ`, Line: 43, Col: 74}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -137,7 +139,7 @@ func dashboard(d StatusData) templ.Component {
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(`{"Authorization": "Bearer ` + d.Token + `"}`)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/controller/ui/dashboard.templ`, Line: 49, Col: 65}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/controller/ui/dashboard.templ`, Line: 51, Col: 65}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -156,7 +158,7 @@ func dashboard(d StatusData) templ.Component {
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(`{"Authorization": "Bearer ` + d.Token + `"}`)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/controller/ui/dashboard.templ`, Line: 63, Col: 66}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/controller/ui/dashboard.templ`, Line: 65, Col: 66}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -174,7 +176,7 @@ func dashboard(d StatusData) templ.Component {
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(`{"Authorization": "Bearer ` + d.Token + `"}`)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/controller/ui/dashboard.templ`, Line: 85, Col: 62}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/controller/ui/dashboard.templ`, Line: 87, Col: 62}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -233,7 +235,7 @@ func pipelineMetrics(m PipelineMetrics) templ.Component {
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d frames", m.AudioBufferDepth))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/controller/ui/dashboard.templ`, Line: 101, Col: 73}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/controller/ui/dashboard.templ`, Line: 103, Col: 73}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -268,7 +270,7 @@ func pipelineMetrics(m PipelineMetrics) templ.Component {
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d ms", m.AudioDriftMs))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/controller/ui/dashboard.templ`, Line: 106, Col: 42}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/controller/ui/dashboard.templ`, Line: 108, Col: 42}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -303,7 +305,7 @@ func pipelineMetrics(m PipelineMetrics) templ.Component {
 		var templ_7745c5c3_Var17 string
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", m.AudioUnderrunTotal))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/controller/ui/dashboard.templ`, Line: 111, Col: 127}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/controller/ui/dashboard.templ`, Line: 113, Col: 127}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
@@ -338,7 +340,7 @@ func pipelineMetrics(m PipelineMetrics) templ.Component {
 		var templ_7745c5c3_Var20 string
 		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", m.AudioOverrunTotal))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/controller/ui/dashboard.templ`, Line: 115, Col: 125}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/controller/ui/dashboard.templ`, Line: 117, Col: 125}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
@@ -351,7 +353,7 @@ func pipelineMetrics(m PipelineMetrics) templ.Component {
 		var templ_7745c5c3_Var21 string
 		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d frames", m.VideoBufferDepth))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/controller/ui/dashboard.templ`, Line: 119, Col: 73}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/controller/ui/dashboard.templ`, Line: 121, Col: 73}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {
@@ -386,7 +388,7 @@ func pipelineMetrics(m PipelineMetrics) templ.Component {
 		var templ_7745c5c3_Var24 string
 		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", m.VideoUnderrunTotal))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/controller/ui/dashboard.templ`, Line: 123, Col: 127}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/controller/ui/dashboard.templ`, Line: 125, Col: 127}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 		if templ_7745c5c3_Err != nil {
@@ -421,7 +423,7 @@ func pipelineMetrics(m PipelineMetrics) templ.Component {
 		var templ_7745c5c3_Var27 string
 		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", m.VideoOverrunTotal))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/controller/ui/dashboard.templ`, Line: 127, Col: 125}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/controller/ui/dashboard.templ`, Line: 129, Col: 125}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 		if templ_7745c5c3_Err != nil {

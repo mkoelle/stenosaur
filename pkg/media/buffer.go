@@ -29,12 +29,12 @@ const (
 // Overrun policy:  discard the oldest frame; increment OverrunTotal.
 // Thread-safe.
 type AudioBuffer struct {
-	mu           sync.Mutex
-	frames       []AudioFrame
-	head, tail   int
-	count        int
-	cap          int
-	log          *slog.Logger
+	mu            sync.Mutex
+	frames        []AudioFrame
+	head, tail    int
+	count         int
+	cap           int
+	log           *slog.Logger
 	UnderrunTotal atomic.Int64
 	OverrunTotal  atomic.Int64
 }

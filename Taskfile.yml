@@ -27,10 +27,69 @@ tasks:
     cmds:
       - go test -race ./...
 
-  lint:
+  vet:
     desc: run go vet
     cmds:
       - go vet ./...
+
+  lint:
+    desc: run all linting and validation tasks
+    deps: [fmt, tidy, vet, verify, vulncheck]
+
+  check:
+    desc: alias for lint
+    cmds:
+      - task: lint
+
+  ci:
+    desc: run all checks and tests (for CI/CD)
+    deps: [check, test]
+
+  pre-commit:
+    desc: run all checks, tests, and build before committing
+    deps: [check, test, build]
+
+  develop:
+    desc: run generation and build for local development
+    deps: [generate, build]
+
+  tidy:
+    desc: run go mod tidy
+    cmds:
+      - go mod tidy
+
+  fmt:
+    desc: run go fmt
+    cmds:
+      - go fmt ./...
+
+  verify:
+    desc: run go mod verify
+    cmds:
+      - go mod verify
+
+  vulncheck:
+    desc: run vulnerability check
+    cmds:
+      - go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+
+  coverage:
+    desc: run tests with coverage report
+    cmds:
+      - go test -coverprofile=coverage.out ./...
+      - go tool cover -html=coverage.out
+
+  docs:
+    desc: run local documentation server
+    cmds:
+      - echo "Documentation server starting at http://localhost:8080"
+      - go run golang.org/x/pkgsite/cmd/pkgsite@latest
+
+  update:
+    desc: update dependencies to latest minor/patch versions
+    cmds:
+      - go get -u ./...
+      - go mod tidy
 
   up:
     desc: build image and start with Docker Compose

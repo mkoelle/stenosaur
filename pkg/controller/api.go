@@ -81,11 +81,11 @@ func (c *Controller) handleStatus(w http.ResponseWriter, _ *http.Request) {
 			"state": sessionState(c.zoomClient.IsConnected()),
 		},
 		"pipeline": map[string]any{
-			"audio_buffer_depth":  c.audioBuffer.Depth(),
+			"audio_buffer_depth":   c.audioBuffer.Depth(),
 			"audio_underrun_total": c.audioBuffer.UnderrunTotal.Load(),
 			"audio_overrun_total":  c.audioBuffer.OverrunTotal.Load(),
-			"audio_drift_ms":      0, // TODO(US-M05): wire drift detection
-			"video_buffer_depth":  c.videoBuffer.Depth(),
+			"audio_drift_ms":       0, // TODO(US-M05): wire drift detection
+			"video_buffer_depth":   c.videoBuffer.Depth(),
 			"video_underrun_total": c.videoBuffer.UnderrunTotal.Load(),
 			"video_overrun_total":  c.videoBuffer.OverrunTotal.Load(),
 		},

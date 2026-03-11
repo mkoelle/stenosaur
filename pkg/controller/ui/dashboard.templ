@@ -1,0 +1,130 @@
+package ui
+
+// StatusData is passed from pkg/controller into the dashboard template.
+// It matches the shape of the /status API response. (ADR-005)
+type StatusData struct {
+	Token   string // ADMIN_TOKEN for HTMX auth headers — never rendered directly
+	Session SessionStatus
+	Pipeline PipelineMetrics
+}
+
+type SessionStatus struct {
+	State      string // "idle" | "streaming"
+	MeetingURL string // password already stripped (ADR-005)
+}
+
+type PipelineMetrics struct {
+	AudioBufferDepth  int
+	AudioUnderrunTotal int64
+	AudioOverrunTotal  int64
+	AudioDriftMs      int
+	VideoBufferDepth  int
+	VideoUnderrunTotal int64
+	VideoOverrunTotal  int64
+}
+
+// dashboard renders the main admin UI page. (ADR-007, US-C01)
+// HTMX polls /status every 2 s to refresh the pipeline metrics panel.
+// Alpine.js handles the confirmation dialog before Stop.
+templ dashboard(d StatusData) {
+	@layout("Dashboard") {
+		<div class="grid grid-cols-1 gap-6 max-w-4xl">
+
+			<!-- Session state + controls -->
+			<section class="bg-gray-900 border border-gray-800 rounded-lg p-5">
+				<h2 class="text-xs text-gray-500 uppercase tracking-widest mb-4">Session</h2>
+				<div class="flex items-center gap-4 mb-4">
+					<span class={ "inline-block w-2 h-2 rounded-full", templ.KV("bg-green-400", d.Session.State == "streaming"), templ.KV("bg-gray-600", d.Session.State != "streaming") }></span>
+					<span class="text-sm">{ d.Session.State }</span>
+				</div>
+				if d.Session.MeetingURL != "" {
+					<p class="text-xs text-gray-500 mb-4 truncate">{ d.Session.MeetingURL }</p>
+				}
+
+				<!-- Start / Stop controls with Alpine.js confirmation (ADR-007) -->
+				<div x-data="{ confirmStop: false }" class="flex gap-3">
+					if d.Session.State != "streaming" {
+						<button
+							hx-post="/start"
+							hx-headers={ `{"Authorization": "Bearer ` + d.Token + `"}` }
+							class="px-4 py-2 text-sm bg-green-600 hover:bg-green-500 rounded">
+							Start
+						</button>
+					}
+					if d.Session.State == "streaming" {
+						<button @click="confirmStop = true"
+							class="px-4 py-2 text-sm bg-red-700 hover:bg-red-600 rounded">
+							Stop
+						</button>
+						<div x-show="confirmStop" class="flex items-center gap-2">
+							<span class="text-xs text-gray-400">Leave meeting?</span>
+							<button
+								hx-post="/stop"
+								hx-headers={ `{"Authorization": "Bearer ` + d.Token + `"}` }
+								@click="confirmStop = false"
+								class="px-3 py-1 text-xs bg-red-600 hover:bg-red-500 rounded">
+								Confirm
+							</button>
+							<button @click="confirmStop = false"
+								class="px-3 py-1 text-xs bg-gray-700 hover:bg-gray-600 rounded">
+								Cancel
+							</button>
+						</div>
+					}
+				</div>
+			</section>
+
+			<!-- Pipeline metrics — auto-refreshed every 2 s via HTMX (ADR-005) -->
+			<section
+				id="pipeline-metrics"
+				class="bg-gray-900 border border-gray-800 rounded-lg p-5"
+				hx-get="/status"
+				hx-trigger="every 2s"
+				hx-target="#pipeline-metrics"
+				hx-swap="outerHTML"
+				hx-headers={ `{"Authorization": "Bearer ` + d.Token + `"}` }>
+				@pipelineMetrics(d.Pipeline)
+			</section>
+
+		</div>
+	}
+}
+
+// pipelineMetrics renders the 7 ADR-002 buffer metrics.
+// This component is also the HTMX poll target — it is returned standalone
+// by the /status handler on partial refresh.
+templ pipelineMetrics(m PipelineMetrics) {
+	<h2 class="text-xs text-gray-500 uppercase tracking-widest mb-4">Pipeline</h2>
+	<div class="grid grid-cols-2 gap-4 text-sm">
+		<div>
+			<p class="text-gray-500 text-xs mb-1">Audio buffer depth</p>
+			<p class="tabular-nums">{ fmt.Sprintf("%d frames", m.AudioBufferDepth) }</p>
+		</div>
+		<div>
+			<p class="text-gray-500 text-xs mb-1">Audio drift</p>
+			<p class={ "tabular-nums", templ.KV("text-yellow-400", m.AudioDriftMs > 40), templ.KV("text-red-400", m.AudioDriftMs > 200) }>
+				{ fmt.Sprintf("%d ms", m.AudioDriftMs) }
+			</p>
+		</div>
+		<div>
+			<p class="text-gray-500 text-xs mb-1">Audio underruns</p>
+			<p class={ "tabular-nums", templ.KV("text-yellow-400", m.AudioUnderrunTotal > 0) }>{ fmt.Sprintf("%d", m.AudioUnderrunTotal) }</p>
+		</div>
+		<div>
+			<p class="text-gray-500 text-xs mb-1">Audio overruns</p>
+			<p class={ "tabular-nums", templ.KV("text-yellow-400", m.AudioOverrunTotal > 0) }>{ fmt.Sprintf("%d", m.AudioOverrunTotal) }</p>
+		</div>
+		<div>
+			<p class="text-gray-500 text-xs mb-1">Video buffer depth</p>
+			<p class="tabular-nums">{ fmt.Sprintf("%d frames", m.VideoBufferDepth) }</p>
+		</div>
+		<div>
+			<p class="text-gray-500 text-xs mb-1">Video underruns</p>
+			<p class={ "tabular-nums", templ.KV("text-yellow-400", m.VideoUnderrunTotal > 0) }>{ fmt.Sprintf("%d", m.VideoUnderrunTotal) }</p>
+		</div>
+		<div>
+			<p class="text-gray-500 text-xs mb-1">Video overruns</p>
+			<p class={ "tabular-nums", templ.KV("text-yellow-400", m.VideoOverrunTotal > 0) }>{ fmt.Sprintf("%d", m.VideoOverrunTotal) }</p>
+		</div>
+	</div>
+}

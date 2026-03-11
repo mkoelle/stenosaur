@@ -1,0 +1,50 @@
+package ui
+
+// logs renders the live log tail page. (ADR-005, ADR-007, US-C06)
+//
+// HTMX's WebSocket extension connects to /logs and appends each incoming
+// JSON log line as a new row. No custom JavaScript required.
+templ logs(token string) {
+	@layout("Logs") {
+		<div class="max-w-4xl">
+			<div class="flex items-center justify-between mb-4">
+				<h2 class="text-xs text-gray-500 uppercase tracking-widest">Live Log Stream</h2>
+				<span class="text-xs text-gray-600">/logs · WebSocket</span>
+			</div>
+
+			<!-- HTMX WebSocket extension — connects and streams log lines (ADR-005) -->
+			<!-- Auth token is embedded in the connect URL as a query param since -->
+			<!-- the WebSocket protocol does not support custom headers on the    -->
+			<!-- initial browser upgrade request from JavaScript.                -->
+			<div
+				hx-ext="ws"
+				ws-connect={ "/logs?token=" + token }
+				class="bg-gray-900 border border-gray-800 rounded-lg p-4 h-[600px] overflow-y-auto font-mono text-xs"
+				id="log-container">
+				<!-- Incoming log messages are appended here by HTMX WS extension -->
+				<div id="log-output" class="flex flex-col gap-1"></div>
+			</div>
+
+			<!-- Auto-scroll: Alpine keeps the log container scrolled to the bottom -->
+			<script>
+				// Minimal inline script — auto-scroll only. Not a framework violation (ADR-007).
+				// Alpine x-data could handle this but direct DOM is simpler for scroll.
+				const container = document.getElementById('log-container');
+				const observer = new MutationObserver(() => {
+					container.scrollTop = container.scrollHeight;
+				});
+				observer.observe(container, { childList: true, subtree: true });
+			</script>
+		</div>
+	}
+}
+
+// logLine renders a single parsed log entry row.
+// Called server-side for initial render; subsequent lines come via WebSocket.
+templ logLine(level, component, msg string) {
+	<div class={ "flex gap-3 py-0.5", templ.KV("text-red-400", level == "error"), templ.KV("text-yellow-400", level == "warn"), templ.KV("text-gray-400", level == "info"), templ.KV("text-gray-600", level == "debug") }>
+		<span class="text-gray-600 shrink-0 w-8">{ level[:1] }</span>
+		<span class="text-gray-600 shrink-0 w-12">{ component }</span>
+		<span>{ msg }</span>
+	</div>
+}

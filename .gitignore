@@ -1,0 +1,22 @@
+# Secrets — never commit
+.env
+
+# Build output
+bin/
+
+# Go toolchain
+*.test
+*.out
+
+# Templ generated files are committed alongside sources
+# (uncomment the line below only if you prefer not to commit generated files)
+# *_templ.go
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.idea/
+.vscode/
+*.swp

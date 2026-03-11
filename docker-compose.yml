@@ -1,0 +1,13 @@
+services:
+  stenosaur:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "${ADMIN_PORT:-8080}:8080"
+    volumes:
+      # Media source files — directory must exist before first run (see media/.gitkeep)
+      - ./media:/app/media
+    env_file:
+      - .env
+    # No devices: block required — audio/video injection is handled internally
+    # (PulseAudio null sink + Chromium fake device flags; see ADR-003, ADR-004)

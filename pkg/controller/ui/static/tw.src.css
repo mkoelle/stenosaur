@@ -1,0 +1,13 @@
+/* tw.src.css — Tailwind CSS directives
+ *
+ * This is the source file for the generated tw.css.
+ * Edit THIS file, then run `make generate` to rebuild tw.css.
+ * Do NOT hand-edit tw.css directly. (ADR-007)
+ *
+ * Tailwind CLI scans all .templ files for class names and generates
+ * only the classes that are actually used in pkg/controller/ui/*.templ
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

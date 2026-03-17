@@ -15,16 +15,18 @@ Two questions must be answered before implementation begins:
 
 2. **How are frames buffered between the renderer and the bot?** The renderer and bot run as separate goroutines at potentially different rates. Without explicit buffer contracts, the pipeline will exhibit timing gaps, frame drops, and audio dropouts under normal conditions.
 
+How frames are physically delivered from `pkg/bot` into Chromium once they leave the buffer is a separate concern, decided in ADR-008 (audio) and ADR-009 (video).
+
 ---
 
 ## Constraint: The Injection Boundary Determines the Format
 
 Under the PWA path, Stenosaur does not write audio/video directly to Zoom's media stack — it writes to Chromium's fake media device layer. The formats Chromium accepts at this boundary are fixed and not configurable:
 
-- **Audio:** Chromium's fake audio capture expects WAV at **48 kHz, mono, 16-bit PCM**. Chromium's WebRTC stack operates natively at 48 kHz; any other rate requires resampling at the boundary with undefined quality characteristics.
-- **Video:** Chromium's fake video capture expects **YUV 4:2:0 planar** (`.y4m`, pixel format tag `C420`). This is Chromium's `libyuv` native format; no transcoding is required. Alternative formats (`.mjpeg`) cause frame rate instability and higher CPU usage.
+- **Audio:** Chromium's fake audio capture operates at **48 kHz, mono, 16-bit PCM**. Chromium's WebRTC stack runs natively at 48 kHz; any other rate requires resampling at the injection boundary with undefined quality characteristics.
+- **Video:** Chromium's fake video capture expects **YUV 4:2:0 planar** (`.y4m`, pixel format tag `C420`). This is Chromium's `libyuv` native format; no transcoding is required at injection. Alternative formats (`.mjpeg`) cause frame rate instability and higher CPU usage.
 
-All renderer sources must normalize output to these formats. The format values are derived from the injection boundary, not chosen arbitrarily.
+All renderer sources must normalize output to these formats. The format values are derived from the injection boundary, not chosen arbitrarily. The mechanisms by which frames reach that boundary differ between audio and video and are specified in ADR-008 and ADR-009 respectively.
 
 ---
 
@@ -33,7 +35,7 @@ All renderer sources must normalize output to these formats. The format values a
 | Property | Value | Basis |
 |---|---|---|
 | Encoding | PCM linear | Lossless; no codec overhead in pipeline |
-| Bit depth | 16-bit signed little-endian | WAV standard; Chromium fake audio requirement |
+| Bit depth | 16-bit signed little-endian | Chromium fake audio requirement; `pacat` wire format (ADR-008) |
 | Sample rate | 48,000 Hz | Chromium WebRTC native rate; no resampling at injection |
 | Channels | Mono (1) | Zoom Web App mic input is mono; stereo adds complexity with no benefit |
 | Frame size | 480 samples (10 ms) | Standard WebRTC processing block at 48 kHz |
@@ -44,7 +46,7 @@ All renderer sources must normalize output to these formats. The format values a
 
 | Property | Value | Basis |
 |---|---|---|
-| Pixel format | YUV 4:2:0 planar (`yuv420p`) | Chromium `.y4m` requirement; `libyuv` native format |
+| Pixel format | YUV 4:2:0 planar (`yuv420p`) | Chromium `.y4m` requirement; `libyuv` native format (ADR-009) |
 | Resolution | 1280 × 720 (720p) | Zoom Web App standard HD tier |
 | Frame rate | 30 FPS | Standard camera rate expected by the Zoom Web App |
 | Color range | Limited (TV / studio swing, BT.601) | `.y4m` default |
@@ -68,7 +70,7 @@ The renderer and bot run as separate goroutines. Buffering decouples their rates
 | Underrun policy | Emit silence frame; increment underrun metric |
 | Overrun policy | Discard oldest frame; increment overrun metric |
 
-Emitting silence on underrun prevents Chromium's fake audio device from stalling, which produces worse artifacts than a brief gap.
+Emitting silence on underrun prevents the audio injection path (ADR-008) from stalling, which produces worse artifacts than a brief silent gap.
 
 ### Video Buffer
 
@@ -80,7 +82,7 @@ Emitting silence on underrun prevents Chromium's fake audio device from stalling
 | Underrun policy | Repeat last delivered frame; increment underrun metric |
 | Overrun policy | Discard oldest frame; increment overrun metric |
 
-Repeating the last frame on underrun maintains visual continuity. A static frame is preferable to a flash to black during brief renderer hiccups.
+Repeating the last frame on underrun maintains visual continuity on the `.y4m` pipe (ADR-009). A static frame is preferable to a pipe stall or a flash to black during brief renderer hiccups.
 
 ---
 
@@ -95,6 +97,8 @@ Each frame carries a PTS (presentation timestamp) set at production time. The bo
 | Audio drift > 40 ms | Emit `warn` log; drop or duplicate one frame to resync |
 | Audio drift > 200 ms | Emit `error` log |
 | Video delivery delta > 33.3 ms (one frame period) | Emit `warn` log |
+
+The 40 ms audio drift threshold deliberately matches the `--latency-msec=40` target set for `pacat` in ADR-008; drift beyond this threshold means the PulseAudio buffer is running dry.
 
 When switching sources, the renderer resets the PTS origin and flushes both buffers before resuming production to prevent cross-source sync discontinuity.
 
@@ -136,10 +140,9 @@ The buffer layer must emit the following metrics, exposed via the controller sta
 
 ## Revision Triggers
 
-1. **SDK migration (ADR-004b):** the Meeting SDK has different format requirements (typically 16 kHz mono audio, SDK-specific video callbacks); this ADR's contracts are specific to the Chromium injection path
-2. **PulseAudio virtual sink replaces file-based injection:** if dynamic audio is fed via a PulseAudio virtual sink rather than a WAV pipe, the injection boundary changes and the audio contract must be updated
-3. **Resolution or frame rate change:** product or Zoom Web App requirements change; update video contract and buffer sizing
-4. **Buffer tuning from production data:** underrun/overrun metrics indicate capacities are wrong for real workloads; update with evidence from incident logs
+1. **SDK migration (ADR-004b):** the Meeting SDK has different format requirements (typically 16 kHz mono audio, SDK-specific video callbacks); the format contracts in this ADR are specific to the Chromium injection boundary and are not portable to the SDK path
+2. **Resolution or frame rate change:** product or Zoom Web App requirements change; update the video contract and buffer sizing accordingly
+3. **Buffer tuning from production data:** underrun/overrun metrics indicate capacities are wrong for real workloads; update with evidence from incident logs
 
 ---
 
@@ -149,3 +152,5 @@ The buffer layer must emit the following metrics, exposed via the controller sta
 - **ADR-003 (Docker Deployment):** container memory limits must account for the ~27 MB video buffer
 - **ADR-004 (Zoom Integration):** the PWA/Chromium path is the direct source of the format requirements; these contracts are not portable to the SDK path
 - **ADR-005 (Observability):** the seven pipeline metrics defined here are surfaced via the `/status` endpoint and WebSocket stream specified in ADR-005
+- **ADR-008 (Audio Injection Mechanism):** specifies how PCM frames leaving the audio buffer are delivered into Chromium's microphone input via PulseAudio
+- **ADR-009 (Video Injection Mechanism):** specifies how YUV420p frames leaving the video buffer are delivered into Chromium's camera input via a named pipe

@@ -2,7 +2,7 @@
 
 Stenosaur is a containerized Zoom meeting bot written in Go. It joins meetings via the Zoom Web App (Playwright/PWA automation), injects audio and video from configurable sources, and exposes a web admin UI for monitoring and control.
 
-Read `docs/ARCHITECTURE.md` for the full system design. All architectural decisions are recorded in `docs/adr/`. Do not make structural changes that contradict a Proposed or Accepted ADR without flagging the conflict.
+Read `docs/ARCHITECTURE.md` for the full system design. All architectural decisions are recorded in `docs/adr/` (ADR-001 through ADR-014). Do not make structural changes that contradict a Proposed or Accepted ADR without flagging the conflict.
 
 ---
 
@@ -136,13 +136,23 @@ These values are fixed by Chromium's injection boundary. Do not change them with
 
 Do not implement the following without first flagging it for an ADR update:
 
-- Changing the audio sample rate, bit depth, or frame size
-- Changing the video resolution, frame rate, or pixel format
-- Adding a second container or process
-- Adding any Zoom API or SDK integration
-- Changing the HTTP endpoint surface or log schema
-- Adding a JS framework (Vue, React, Svelte) to the UI
-- Adding CGo dependencies
+- Changing the audio sample rate, bit depth, or frame size (ADR-002)
+- Changing the video resolution, frame rate, or pixel format (ADR-002)
+- Changing the audio injection mechanism (PulseAudio/pacat — ADR-008)
+- Changing the video injection mechanism (FIFO pipe — ADR-009)
+- Replacing FFmpeg subprocess with CGo native bindings (ADR-006)
+- Adding a second container or process (ADR-001)
+- Changing the number of Chromium instances or their flag assignments (ADR-001)
+- Adding any Zoom API or SDK integration (ADR-004)
+- Changing the HTTP endpoint surface or request/response schemas (ADR-005)
+- Changing the log format schema (ADR-005)
+- Adding a new audio source type beyond FileDecoder, StreamDecoder, AudioSynth (ADR-010/011)
+- Adding or removing session states or transitions (ADR-014)
+- Changing the Chromium crash recovery model (ADR-014)
+- Adding new PulseAudio modules to the entrypoint (ADR-008/012)
+- Adding a JS framework (Vue, React, Svelte) to the UI (ADR-007)
+- Adding CGo dependencies of any kind (ADR-006)
+- Changing the gain/mixing model for DuckingSource or Mixer (ADR-013)
 
 ---
 
@@ -150,10 +160,17 @@ Do not implement the following without first flagging it for an ADR update:
 
 | ADR | Decision |
 |---|---|
-| ADR-001 | Single container; single process; in-process package communication |
+| ADR-001 | Single container; single process; **two Chromium instances** (Chromium A: Zoom session with fake device flags; Chromium B: WebRenderer without flags) |
 | ADR-002 | Audio 48 kHz PCM; Video YUV420p `.y4m`; buffer contracts; drift correction |
-| ADR-003 | Docker Compose; env var config; no host device dependencies |
+| ADR-003 | Docker Compose; env var config; no host device dependencies; `MEETING_URL` is a runtime param of `POST /start`, not an env var |
 | ADR-004 | Zoom PWA/Playwright; no Marketplace registration; `ZoomClient` interface |
-| ADR-005 | HTTP endpoint surface; log format; WebSocket log stream |
-| ADR-006 | Go 1.21+; `playwright-community/playwright-go`; `log/slog` |
+| ADR-005 | HTTP endpoint surface; `POST /start` accepts meeting URL; log format; WebSocket log stream |
+| ADR-006 | Go 1.21+; `playwright-community/playwright-go`; `log/slog`; **FFmpeg via subprocess (decided — no CGo)** |
 | ADR-007 | Templ + HTMX + Alpine.js + Tailwind CSS for web admin UI |
+| ADR-008 | Audio injection via PulseAudio null sink + `pacat` subprocess; wire format: raw 16-bit LE PCM, no WAV header |
+| ADR-009 | Video injection via `.y4m` named pipe (FIFO); `--use-file-for-fake-video-capture` on Chromium A only |
+| ADR-010 | External stream sources: `yt-dlp` for URL resolution + FFmpeg subprocess for decoding; `StreamDecoder` type |
+| ADR-011 | Audio source sequencing: `Playlist` type; PTS continuity across track boundaries; pre-loading |
+| ADR-012 | Meeting audio monitoring: isolated `stenosaur_output_sink`; RMS VAD goroutine; `DuckingController` interface |
+| ADR-013 | Audio mixing: `DuckingSource` wrapper; `Mixer` type; `OverlayController` interface; gain ramping |
+| ADR-014 | Session state machine: `IDLE → JOINING → CONNECTED → STREAMING → ERROR`; Chromium crash recovery with auto-restart |
